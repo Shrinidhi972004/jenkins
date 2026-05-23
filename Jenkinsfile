@@ -10,12 +10,15 @@ pipeline {
         }
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install -r requirements.txt'
+                sh '''
+                    python3 -m venv venv
+                    venv/bin/pip install -r requirements.txt
+                '''
             }
         }
         stage('Test') {
             steps {
-                sh 'python3 -m pytest test_app.py -v'
+                sh 'venv/bin/python -m pytest test_app.py -v'
             }
         }
         stage('Run') {
