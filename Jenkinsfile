@@ -35,6 +35,7 @@ pipeline {
                     docker stop flask-demo || true
                     docker rm flask-demo || true
                     docker run -d -p 5000:5000 --name flask-demo flask-jenkins-demo:latest
+                    docker ps 
                 '''
             }
         }
