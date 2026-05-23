@@ -23,7 +23,12 @@ pipeline {
         }
         stage('Run') {
             steps {
-                echo 'App is ready to deploy!'
+                sh '''
+                    venv/bin/python app.py &
+                    sleep 2
+                    curl http://localhost:5000
+                    kill $(lsof -t -i:5000)
+                '''
             }
         }
     }
