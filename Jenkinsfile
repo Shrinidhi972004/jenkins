@@ -1,19 +1,20 @@
+@Library('my-shared-library') _
+
 pipeline {
     agent { label 'jenkins-agent' }
 
     environment {
-        DOCKERHUB_CREDS = credentials('dockerhub-creds')
         IMAGE_NAME = 'shrinidhiupadhyaya/flask-jenkins-demo'
     }
 
     stages {
         stage('Clone') {
             steps {
-                echo 'Cloninf thee repo'
+                echo 'Cloning the repo...'
                 checkout scm
             }
         }
-        stage('Install the dependencies') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
                     python3 -m venv venv
@@ -26,36 +27,26 @@ pipeline {
                 sh 'venv/bin/python -m pytest test_app.py -v'
             }
         }
-        stage('Build the docker image') {
+        stage('Build Docker Image') {
             steps {
-                sh '''
-                    export DOCKER_BUILDKIT=1
-                    docker build --cache-from $IMAGE_NAME:latest -t $IMAGE_NAME:latest .
-                '''
+                buildImage(env.IMAGE_NAME)
             }
         }
-        stage('Push the docker image') {
+        stage('Push to DockerHub') {
             steps {
-                sh '''
-                    echo $DOCKERHUB_CREDS_PSW | docker login -u $DOCKERHUB_CREDS_USR --password-stdin
-                    docker push $IMAGE_NAME:latest
-                '''
+                pushImage(env.IMAGE_NAME)
             }
         }
-        stage('Run container') {
+        stage('Run Container') {
             steps {
-                sh '''
-                    docker stop flask-demo || true
-                    docker rm flask-demo || true
-                    docker pull $IMAGE_NAME:latest
-                    docker run -d -p 5000:5000 --name flask-demo $IMAGE_NAME:latest
-                ''' 
+                runContainer(env.IMAGE_NAME)
             }
         }
     }
+
     post {
         success {
-            echo 'Pipeline succeeded! App is running at port 5000'
+            echo 'Pipeline succeeded! App is running at port 5000.'
         }
         failure {
             echo 'Pipeline failed!'
