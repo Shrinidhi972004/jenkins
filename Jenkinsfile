@@ -40,6 +40,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                    export KUBECONFIG=/tmp/jenkins/.kube/config
                     kubectl apply -f k8s-deployment.yaml
                     kubectl rollout status deployment/flask-app
                 '''
