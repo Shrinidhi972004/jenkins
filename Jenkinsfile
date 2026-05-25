@@ -1,7 +1,7 @@
 @Library('my-shared-library') _
 
 pipeline {
-    agent { label 'jenkins-agent' }
+    agent { label 'agent-1' }
 
     environment {
         IMAGE_NAME = 'shrinidhiupadhyaya/flask-jenkins-demo'
@@ -37,16 +37,19 @@ pipeline {
                 pushImage(env.IMAGE_NAME)
             }
         }
-        stage('Run Container') {
+        stage('Deploy to Kubernetes') {
             steps {
-                runContainer(env.IMAGE_NAME)
+                sh '''
+                    kubectl apply -f k8s-deployment.yaml
+                    kubectl rollout status deployment/flask-app
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline succeeded! App is running at port 5000.'
+            echo 'Pipeline succeeded! App deployed to Kubernetes.'
         }
         failure {
             echo 'Pipeline failed!'
