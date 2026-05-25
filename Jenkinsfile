@@ -49,7 +49,7 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline succeeded! App deployed to Kubernetes.'
+            echo 'Pipeline succeeded! App deployed to Kubernetes....'
         }
         failure {
             echo 'Pipeline failed!'
